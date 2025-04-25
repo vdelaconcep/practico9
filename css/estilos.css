@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'Bungasai';
+    src: url(../fonts/Bungasai.ttf);
+}
+
+h1 {
+    font-family: 'BUngasai';
+    font-size: 5em;
+}
