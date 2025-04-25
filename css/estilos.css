@@ -4,6 +4,14 @@
 }
 
 h1 {
-    font-family: 'BUngasai';
-    font-size: 5em;
+    font-family: 'Bungasai';
+    font-size: 6em;
+}
+
+.btn-eliminar:hover {
+    background-color: #DC3545;
+}
+
+.btn-enviar:hover {
+    background-color:green;
 }
