@@ -15,16 +15,30 @@
         <h2>de contactos</h2>
     </header>
     <div class="container">
-        <div class="text-end">
-            <a href="./pages/set-contacto.html"><button class="btn btn-success mb-3">Añadir <i class="fa-solid fa-user-plus"></i></button></a>
-        </div>
-        <table class="table table-success table-striped table-bordered table-responsive text-center align-middle">
+        <table id="tabla-contactos" class="table table-success table-striped table-bordered table-responsive text-center align-middle">
             <tr>
                 <th>ID</th>
                 <th>Nombre</th>
                 <th>E-mail</th>
                 <th>Fecha de nacimiento</th>
                 <th>Acción</th>
+            </tr>
+            <tr id="fila-contacto-nuevo">
+                <form>
+                    <td>#</td>
+                    <td>
+                        <input id="nombreContacto" type="text" required>
+                    </td>
+                    <td>
+                        <input id="emailContacto" type="email" required>
+                    </td>
+                    <td>
+                        <input id="nacimientoContacto" type="date">
+                    </td>
+                    <td>
+                        <button id="btn-agregar" class="btn-agregar btn btn-success m-1">Añadir <i class="fa-solid fa-user-plus"></i></button>
+                    </td>
+                </form>
             </tr>
             <tr>
                 <th>78587453</th>
@@ -54,12 +68,10 @@
                 </td>
             </tr>
         </table>
-        <div class="text-end">
-            <a href="./pages/set-contacto.html"><button class="btn btn-success mb-3">Añadir <i class="fa-solid fa-user-plus"></i></button></a>
-        </div>
     </div>
 
 
+    <script src="./js/ajax.js"></script>
     <script src="https://kit.fontawesome.com/5eafe979f1.js" crossorigin="anonymous"></script>
 
 </body>

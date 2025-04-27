@@ -8,6 +8,17 @@ h1 {
     font-size: 6em;
 }
 
+input {
+    background-color: #D1E7DD;
+    border: none;
+    border-bottom: 1px dotted;
+    text-align: center;
+}
+
+input:focus {
+    border: none;
+}
+
 .btn-eliminar:hover {
     background-color: #DC3545;
 }
