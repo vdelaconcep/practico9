@@ -80,56 +80,57 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     xhr.send();
-});
 
-// Evento al presionar el botón agregar (o añadir)
-agregar.addEventListener('click', function (event) {
-    
-    // Variables
-    const inputNombre = document.getElementById('nombreContacto');
-    const inputEmail = document.getElementById('emailContacto');
-    const inputNacimiento = document.getElementById('nacimientoContacto');
-    const formulario = document.querySelector('form');
+    // Evento al presionar el botón agregar (o añadir)
+    document.getElementById("btn-agregar").addEventListener('click', function (event) {
+        console.log('Entró');
+        // Variables
+        const inputNombre = document.getElementById('nombreContacto');
+        const inputEmail = document.getElementById('emailContacto');
+        const inputNacimiento = document.getElementById('nacimientoContacto');
+        const formulario = document.querySelector('form');
 
-    // Validación de los inputs
-    validarTexto(inputNombre, 3, 50);
-    ValidarEmail(inputEmail);
-    ValidarFecha(inputNacimiento);
+        // Validación de los inputs
+        validarTexto(inputNombre, 3, 50);
+        ValidarEmail(inputEmail);
+        ValidarFecha(inputNacimiento);
 
-    // Si está validado el formulario, enviar los datos al servidor
+        // Si está validado el formulario, enviar los datos al servidor
 
-    if (validacion) {
-        // Captura de datos
-        const nombre = inputNombre.value;
-        const email = inputEmail.value;
-        const nacimiento = inputNacimiento.value;
+        if (validacion) {
+            // Captura de datos
+            const nombre = inputNombre.value;
+            const email = inputEmail.value;
+            const nacimiento = inputNacimiento.value;
 
-        // Objeto JSON que será enviado al servidor
-        const datos = {
-            nombre: nombre,
-            email: email,
-            nacimiento: nacimiento
-        };
+            // Objeto JSON que será enviado al servidor
+            const datos = {
+                nombre: nombre,
+                email: email,
+                nacimiento: nacimiento
+            };
 
-        // Configuración de la solicitud xhr
-        xhr.open('POST', `http://localhost:${PORT}`, true);
-        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            // Configuración de la solicitud xhr
+            xhr.open('POST', `http://localhost:${PORT}`, true);
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 
-        // Manejo de respuesta del servidor
-        xhr.onload = function () {
-            if (xhr.status != 200) {
-                tabla.insertAdjacentHTML('beforebegin', "<div id='div-error-solicitud' style='background-color: goldenrod;color: white; font-weight: bold; text-align: center'><p> Error al enviar la solicitud al servidor</p></div>");
-            } else {
-                document.getElementById('div-error-solicitud').style.display = 'none';
-            }
-        };
+            // Manejo de respuesta del servidor
+            xhr.onload = function () {
+                if (xhr.status != 200) {
+                    tabla.insertAdjacentHTML('beforebegin', "<div id='div-error-solicitud' style='background-color: goldenrod;color: white; font-weight: bold; text-align: center'><p> Error al enviar la solicitud al servidor</p></div>");
+                } else {
+                    document.getElementById('div-error-solicitud').style.display = 'none';
+                }
+            };
 
-        // Envío de datos
-        xhr.send(JSON.stringify(datos));
+            // Envío de datos
+            xhr.send(JSON.stringify(datos));
 
-        // Limpieza del formulario después de enviar datos
-        formulario.submit();
-    }
+            // Limpieza del formulario después de enviar datos
+            formulario.submit();
+        }
+    });
+
 });
 
 
