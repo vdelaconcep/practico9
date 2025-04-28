@@ -6,7 +6,9 @@ const xhr = new XMLHttpRequest();
 // Declaración de variables
 const agregar = document.getElementById('btn-agregar');
 const tabla = document.querySelector('table');
-let validacion = false;
+let validacionTexto = false;
+let validacionEmail = false;
+let validacionFecha = false;
 
 // Función para validar input tipo texto por longitud
 function validarTexto(inputTexto, minlength, maxlength) {
@@ -14,12 +16,12 @@ function validarTexto(inputTexto, minlength, maxlength) {
     let longitud = inputValue.trim().length;
     if (longitud < minlength) {
         inputTexto.setCustomValidity('Este campo debe tener ' + minlength + ' caracteres como mínimo');
-        validacion = false;
+        validacionTexto = false;
     } else if (longitud > maxlength) {
         inputTexto.setCustomValidity('Este campo no debe tener más de ' + minlength + ' caracteres');
-        validacion = false;
+        validacionTexto = false;
     } else {
-        validacion = true;
+        validacionTexto = true;
     }
     inputTexto.addEventListener('input', function () {
         inputTexto.setCustomValidity("")
@@ -34,9 +36,9 @@ function ValidarEmail(inputEmail) {
     let inputValue = inputEmail.value;
     if (!regex.test(inputValue)) {
         inputEmail.setCustomValidity('Debe ingresar un e-mail válido');
-        validacion = false;
+        validacionEmail = false;
     } else {
-        validacion = true;
+        validacionEmail = true;
     }
     inputEmail.addEventListener('input', function () {
         inputEmail.setCustomValidity("");
@@ -50,24 +52,35 @@ function ValidarFecha(inputFecha) {
     let inputValue = inputFecha.value;
     if (inputValue == "") {
         inputFecha.setCustomValidity('Seleccione una fecha');
-        validacion = false;
+        validacionFecha = false;
     } else {
-        validacion = true;
+        validacionFecha = true;
     }
     inputFecha.addEventListener('input', function () {
         inputFecha.setCustomValidity("");
     });
 }
 
-// Evento al cargar la aplicación (carga contactos de la base de datos en la tabla)
-document.addEventListener('DOMContentLoaded', () => {
+// Función para obtener datos de la base de datos y parsearlos
+async function obtenerDatos() {
     xhr.open('GET', `http://localhost:${PORT}/api/contactos`, true);
     xhr.onload = function () {
         if (this.status == 200) {
             let data = JSON.parse(this.responseText);
-            data.forEach(element => {
-                let fila = document.createElement('tr')
-                fila.innerHTML += `
+            return data
+        } else {
+            console.log('No se pudieron obtener los datos');
+        }
+    };
+    xhr.send();
+}
+
+// Evento al cargar la aplicación (carga contactos de la base de datos en la tabla)
+document.addEventListener('DOMContentLoaded', async function () {
+    const contacto = await obtenerDatos();
+    contacto.forEach(element => {
+        let fila = document.createElement('tr');
+        fila.innerHTML += `
                 <th>${element._id}</th>
                 <td>${element.nombre}</td>
                 <td>${element.email}</td>
@@ -75,17 +88,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>
                     <button id='modificar-${element._id}' class="btn btn-outline-dark m-1">Modificar <i class="fa-solid fa-file-pen"></i></button><button id='eliminar-${element._id}' class="btn-eliminar btn btn-outline-dark m-1">Eliminar <i class="fa-solid fa-trash"></i></button>
                 </td>`;
-                tabla.appendChild(fila);
-            });
-        } else {
-            console.log('No se pudieron obtener los datos');
-        }
-    };
-    xhr.send();
+        tabla.appendChild(fila);
+    });
+});
 
-    // Evento al presionar el botón agregar (o añadir)
-    document.getElementById("btn-agregar").addEventListener('click', function (event) {
-        console.log('Entró');
+// Evento al presionar el botón agregar (o añadir)
+    document.getElementById("btn-agregar").addEventListener('click', function () {
         // Variables
         const inputNombre = document.getElementById('nombreContacto');
         const inputEmail = document.getElementById('emailContacto');
@@ -98,8 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ValidarFecha(inputNacimiento);
 
         // Si está validado el formulario, enviar los datos al servidor
-
-        if (validacion) {
+        if (validacionTexto && validacionEmail && validacionFecha) {
             // Captura de datos
             const nombre = inputNombre.value;
             const email = inputEmail.value;
@@ -119,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Manejo de respuesta del servidor
             xhr.onload = function () {
                 if (xhr.status != 200) {
-                    tabla.insertAdjacentHTML('beforebegin', "<div id='div-error-solicitud' style='background-color: goldenrod;color: white; font-weight: bold; text-align: center'><p> Error al enviar la solicitud al servidor</p></div>");
+                    tabla.insertAdjacentHTML('beforebegin', "<div style='background-color: goldenrod;color: white; font-weight: bold; text-align: center'><p> Error al enviar la solicitud al servidor</p></div>");
                 } else {
                     document.getElementById('div-error-solicitud').style.display = 'none';
                 }
@@ -132,8 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
             formulario.submit();
         }
     });
-
-});
 
 
 

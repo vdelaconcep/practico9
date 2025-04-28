@@ -14,7 +14,7 @@ const PORT = 3000;
 // Conexión con la base de datos local
 mongoose.connect('mongodb://localhost:27017/practico9')
     .then(() => console.log('Conectado a la base de datos'))
-    .catch(err => console.log('No se puedo conectar con la base de datos', err));
+    .catch(err => console.log('No se pudo conectar con la base de datos', err));
 
 // Middlewares
 app.use(express.static('public'));
