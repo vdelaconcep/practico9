@@ -59,6 +59,29 @@ function ValidarFecha(inputFecha) {
     });
 }
 
+// Evento al cargar la aplicación (carga contactos de la base de datos en la tabla)
+document.addEventListener('DOMContentLoaded', () => {
+    xhr.open('GET', `http://localhost:${PORT}/api/contactos`, true);
+    xhr.onload = function () {
+        if (this.status == 200) {
+            let data = JSON.parse(this.responseText);
+            data.forEach(element => {
+                tabla.innerHTML += `
+                <th>${element._id}</th>
+                <td>${element.nombre}</td>
+                <td>${element.email}</td>
+                <td>${element.nacimiento.slice(0, 10)}</td>
+                <td>
+                    <button id='modificar-${element._id}' class="btn btn-outline-dark m-1">Modificar <i class="fa-solid fa-file-pen"></i></button><button id='eliminar-${element._id}' class="btn-eliminar btn btn-outline-dark m-1">Eliminar <i class="fa-solid fa-trash"></i></button>
+                </td>`;
+            });
+        } else {
+            console.log('No se pudieron obtener los datos');
+        }
+    };
+    xhr.send();
+});
+
 // Evento al presionar el botón agregar (o añadir)
 agregar.addEventListener('click', function (event) {
     
@@ -66,10 +89,9 @@ agregar.addEventListener('click', function (event) {
     const inputNombre = document.getElementById('nombreContacto');
     const inputEmail = document.getElementById('emailContacto');
     const inputNacimiento = document.getElementById('nacimientoContacto');
-    const formulario = document.querySelector('form')
+    const formulario = document.querySelector('form');
 
     // Validación de los inputs
-    
     validarTexto(inputNombre, 3, 50);
     ValidarEmail(inputEmail);
     ValidarFecha(inputNacimiento);
@@ -93,7 +115,7 @@ agregar.addEventListener('click', function (event) {
         xhr.open('POST', `http://localhost:${PORT}`, true);
         xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
 
-        // Manejar respuesta del servidor
+        // Manejo de respuesta del servidor
         xhr.onload = function () {
             if (xhr.status != 200) {
                 tabla.insertAdjacentHTML('beforebegin', "<div id='div-error-solicitud' style='background-color: goldenrod;color: white; font-weight: bold; text-align: center'><p> Error al enviar la solicitud al servidor</p></div>");
@@ -102,12 +124,14 @@ agregar.addEventListener('click', function (event) {
             }
         };
 
-        // Enviar datos
+        // Envío de datos
         xhr.send(JSON.stringify(datos));
 
-        // Limpiar el formulario después de enviar datos
+        // Limpieza del formulario después de enviar datos
         formulario.submit();
     }
-})
+});
+
+
 
 

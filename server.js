@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 const express = require('express');
 
-// Modelo de contacto
+// Modelo de contacto en base de datos
 const Contacto = require('./modeloContacto');
 
 // Creación del servidor
@@ -31,7 +31,17 @@ app.post('/', (req, res) => {
     // Registro en base de datos
     const contacto = new Contacto(contactoNuevo);
     contacto.save();
-})
+});
+
+// Obtención de datos desde la base de datos y envío al front
+app.get('/api/contactos', async (req, res) => {
+    try {
+        const contactos = await (Contacto.find());
+        res.json(contactos);
+    } catch (error) {
+        res.status(500).send('Error al obtener los contactos');
+    }
+});
 
 // Middlewares de error
 app.use((req, res) => {
