@@ -66,7 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (this.status == 200) {
             let data = JSON.parse(this.responseText);
             data.forEach(element => {
-                tabla.innerHTML += `
+                let fila = document.createElement('tr')
+                fila.innerHTML += `
                 <th>${element._id}</th>
                 <td>${element.nombre}</td>
                 <td>${element.email}</td>
@@ -74,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>
                     <button id='modificar-${element._id}' class="btn btn-outline-dark m-1">Modificar <i class="fa-solid fa-file-pen"></i></button><button id='eliminar-${element._id}' class="btn-eliminar btn btn-outline-dark m-1">Eliminar <i class="fa-solid fa-trash"></i></button>
                 </td>`;
+                tabla.appendChild(fila);
             });
         } else {
             console.log('No se pudieron obtener los datos');
