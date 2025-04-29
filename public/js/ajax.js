@@ -61,35 +61,51 @@ function ValidarFecha(inputFecha) {
     });
 }
 
-// Función para obtener datos de la base de datos y parsearlos
-async function obtenerDatos() {
+// Evento al cargar la aplicación (carga contactos de la base de datos en la tabla)
+document.addEventListener('DOMContentLoaded', function () {
+    // Obtener datos
     xhr.open('GET', `http://localhost:${PORT}/api/contactos`, true);
     xhr.onload = function () {
         if (this.status == 200) {
             let data = JSON.parse(this.responseText);
-            return data
+            
+            // Creación de cada una de las filas (una por cada contacto)
+            data.forEach(element => {
+                let fila = document.createElement('tr');
+                fila.innerHTML += `
+                <td style="border-left: 1px solid #A7B9B1; border-right: 1px solid #A7B9B1">${element.nombre}</td>
+                <td style="border-right: 1px solid #A7B9B1">${element.email}</td>
+                <td style="border-right: 1px solid #A7B9B1">${element.nacimiento.slice(0, 10)}</td>
+                `;
+
+                // Última celda (botones)
+                let celda = document.createElement('td');
+                celda.setAttribute('style', 'border-right: 1px solid #A7B9B1');
+
+                // Botón modificar
+                let btnModificar = document.createElement('button');
+                btnModificar.setAttribute('id', `modificar-${element._id}`);
+                btnModificar.setAttribute('class', `btn btn-outline-dark m-1 border-1`);
+                btnModificar.innerHTML = 'Modificar <i class="fa-solid fa-file-pen"></i>';
+
+                // Botón eliminar
+                let btnEliminar = document.createElement('button');
+                btnEliminar.setAttribute('id', `eliminar-${element._id}`);
+                btnEliminar.setAttribute('class', `btn-eliminar btn btn-outline-dark m-1 border-1`);
+                btnEliminar.innerHTML = 'Eliminar <i class="fa-solid fa-trash"></i>';
+
+                // Insertar botones en la celda, celda en la fila y fila en la tabla
+                celda.appendChild(btnModificar);
+                celda.appendChild(btnEliminar);
+                fila.appendChild(celda);
+                fila.setAttribute('style', 'background-color: #D1E7DD !important; border-bottom: 1px solid #A7B9B1');
+                tabla.appendChild(fila);
+            });
         } else {
             console.log('No se pudieron obtener los datos');
         }
     };
     xhr.send();
-}
-
-// Evento al cargar la aplicación (carga contactos de la base de datos en la tabla)
-document.addEventListener('DOMContentLoaded', async function () {
-    const contacto = await obtenerDatos();
-    contacto.forEach(element => {
-        let fila = document.createElement('tr');
-        fila.innerHTML += `
-                <th>${element._id}</th>
-                <td>${element.nombre}</td>
-                <td>${element.email}</td>
-                <td>${element.nacimiento.slice(0, 10)}</td>
-                <td>
-                    <button id='modificar-${element._id}' class="btn btn-outline-dark m-1">Modificar <i class="fa-solid fa-file-pen"></i></button><button id='eliminar-${element._id}' class="btn-eliminar btn btn-outline-dark m-1">Eliminar <i class="fa-solid fa-trash"></i></button>
-                </td>`;
-        tabla.appendChild(fila);
-    });
 });
 
 // Evento al presionar el botón agregar (o añadir)
