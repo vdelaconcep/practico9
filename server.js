@@ -43,6 +43,16 @@ app.get('/api/contactos', async (req, res) => {
     }
 });
 
+// Eliminación de un registro de la base de datos
+app.delete('/api/contactos/:id', async (req, res) => {
+    try {
+        const baja = await Contacto.findByIdAndDelete(req.params.id);
+        res.status(204).send(baja)
+    } catch (error) {
+        res.status(500).send('Error al eliminar el registro')
+    }
+})
+
 // Middlewares de error
 app.use((req, res) => {
     res.status(404).send('Página no encontrada');

@@ -19,10 +19,36 @@ input:focus {
     border: none;
 }
 
-.btn-eliminar:hover {
-    background-color: #DC3545;
+.btn-eliminar, .btn-modificar {
+    background-color: #C7DBD2 !important;
 }
 
-.btn-enviar:hover {
-    background-color:green;
+.btn-modificar:hover {
+    background-color: rgb(42, 1, 72) !important;
+}
+
+.btn-eliminar:hover {
+    background-color: #DC3545 !important;
+}
+
+
+@media (min-width: 1000px) {
+
+    #btn-agregar::before {
+        content: "Añadir "
+    }
+
+    .btn-modificar::before {
+        content: "Modificar "
+    }
+
+    .btn-eliminar::before {
+        content: "Eliminar "
+    }
+}
+
+@media (max-width: 1000px) {
+    .btn-modificar, .btn-eliminar {
+        width: 42px;
+    }
 }
