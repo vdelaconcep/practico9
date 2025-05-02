@@ -21,7 +21,7 @@ app.use(express.static('public'));
 app.use(express.json());
 
 // Recepción de datos desde el front
-app.post('/', (req, res) => {
+app.post('/api/contactos', (req, res) => {
     const contactoNuevo = {
         nombre: req.body.nombre,
         email: req.body.email,
@@ -43,6 +43,23 @@ app.get('/api/contactos', async (req, res) => {
     }
 });
 
+// Modificación de un registro de la base de datos
+app.put('/api/contactos/:id', async (req, res) => {
+    try {
+        const buscaPorID = {_id: req.params.id}
+
+        const contactoModificado = {
+            nombre: req.body.nombre,
+            email: req.body.email,
+            nacimiento: req.body.nacimiento
+        };
+        const actualizacion = await Contacto.updateOne(buscaPorID, contactoModificado);
+        res.status(200).send(actualizacion);
+    } catch (error) {
+        res.status(500).send('Error al enviar los datos');
+    }
+})
+
 // Eliminación de un registro de la base de datos
 app.delete('/api/contactos/:id', async (req, res) => {
     try {
@@ -52,6 +69,8 @@ app.delete('/api/contactos/:id', async (req, res) => {
         res.status(500).send('Error al eliminar el registro')
     }
 })
+
+
 
 // Middlewares de error
 app.use((req, res) => {

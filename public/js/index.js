@@ -11,8 +11,8 @@ const peticion = (metodo, url, datos) => {
         const xhr = new XMLHttpRequest();
         xhr.open(metodo, url, true);
 
-        // Se configura el tipo de dato (JSON) para POST
-        if (metodo == 'POST') {
+        // Se configura el tipo de dato (JSON) para POST y PUT
+        if (metodo == 'POST' || metodo == 'PUT') {
             xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         }
 
@@ -132,7 +132,7 @@ function validarFecha(inputFecha) {
         validacionFecha = true;
     }
     inputFecha.addEventListener('input', function () {
-        inputFecha.setCustomValidity("");
+    inputFecha.setCustomValidity("");
     });
 }
 
@@ -161,7 +161,7 @@ const agregar = async () => {
             nacimiento: nacimiento
         };
 
-        const envio = await peticion('POST', `http://localhost:${PORT}`, JSON.stringify(datos));
+        const envio = await peticion('POST', `http://localhost:${PORT}/api/contactos`, JSON.stringify(datos));
 
         if (envio) {
             formulario.submit();
@@ -171,7 +171,10 @@ const agregar = async () => {
 
 // Función para modificar contacto
 const modificar = async (id) => {
-    const divModificar = document.querySelector('.overlay');
+
+    const formulario = document.getElementById('form-modificar');
+    const divModificar = document.getElementById('div-modificar');
+    const divOverlay = document.querySelector('.overlay');
     const btnCancelar = document.getElementById("btn-cancelar-modificacion");
     const btnEnviarModificacion = document.getElementById("btn-enviar-modificacion");
     const inputModificarNombre = document.getElementById("modificar-nombre");
@@ -179,7 +182,7 @@ const modificar = async (id) => {
     const inputModificarFecha = document.getElementById("modificar-fecha");
     const contactoAModificar = await contactoPorId(id);
 
-    divModificar.style.display = 'block';
+    divOverlay.style.display = 'block';
 
     inputModificarNombre.value = contactoAModificar.nombre;
     inputModificarEmail.value = contactoAModificar.email;
@@ -189,12 +192,34 @@ const modificar = async (id) => {
 
     btnCancelar.addEventListener('click', (e) => {
         e.preventDefault();
-        divModificar.style.display = 'none';
+        divOverlay.style.display = 'none';
     });
 
-    btnEnviarModificacion.addEventListener('click', (e) => {
+    btnEnviarModificacion.addEventListener('click', async (e) => {
         e.preventDefault();
+        const nombre = inputModificarNombre.value;
+        const email = inputModificarEmail.value;
+        const nacimiento = inputModificarFecha.value;
+
+        const datos = {
+            nombre: nombre,
+            email: email,
+            nacimiento: nacimiento
+        };
+
+        const envio = await peticion('PUT', `http://localhost:${PORT}/api/contactos/${id}`, JSON.stringify(datos));
+
+        if (envio) {
+            formulario.submit();
+            alert('El registro ha sido modificado');
+        }
     });
+
+    /* divOverlay.addEventListener('click', (event) => {
+        if (event.target != divModificar) {
+            divOverlay.style.display = 'none';
+        }
+    }) */
 }
 
 // Función para eliminar contacto
