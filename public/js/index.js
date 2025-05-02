@@ -27,7 +27,7 @@ const peticion = (metodo, url, datos) => {
                     resolve(true);
                 }
                 
-            } else if (xhr.status == 204 || metodo == 'DELETE') {
+            } else if (xhr.status == 204 && metodo == 'DELETE') {
                 resolve(true);
             } else {
                 reject(new Error('Error en la petición de datos'));
@@ -43,11 +43,25 @@ const peticion = (metodo, url, datos) => {
     });
 };
 
+// Función para obtener datos de la DB
+const obtenerDatos = async () => {
+    const data = await peticion('GET', `http://localhost:${PORT}/api/contactos`);
+    return data;
+}
 
-// Carga datos en la tabla (o muestra mensaje de error)
+// Función para obtener datos de un contacto a partir del id
+const contactoPorId = async (id) => {
+    const dataCompleta = await obtenerDatos();
+    const contacto = dataCompleta.find(element => element._id == id);
+    if (!contacto) return null;
+
+    return contacto;
+};
+
+// Cargar datos en la tabla
 const cargarDatos = async () => {
 
-    const data = await peticion('GET', `http://localhost:${PORT}/api/contactos`);
+    const data = await obtenerDatos();
 
     const fragmento = document.createDocumentFragment();
 
@@ -125,44 +139,70 @@ function validarFecha(inputFecha) {
 // Función para agregar contacto
 const agregar = async () => {
 
-    // Variables
     const inputNombre = document.getElementById('nombreContacto');
     const inputEmail = document.getElementById('emailContacto');
     const inputNacimiento = document.getElementById('nacimientoContacto');
     const formulario = document.querySelector('form');
 
-    // Validación de los inputs
     validarNombre(inputNombre, 3, 50);
     validarEmail(inputEmail);
     validarFecha(inputNacimiento);
 
     // Si está validado el formulario, enviar los datos al servidor
     if (validacionNombre && validacionEmail && validacionFecha) {
-        // Captura de datos
+
         const nombre = inputNombre.value;
         const email = inputEmail.value;
         const nacimiento = inputNacimiento.value;
 
-        // Objeto JSON que será enviado al servidor
         const datos = {
             nombre: nombre,
             email: email,
             nacimiento: nacimiento
         };
 
-        // Creación y onfiguración de la solicitud xhr
         const envio = await peticion('POST', `http://localhost:${PORT}`, JSON.stringify(datos));
 
         if (envio) {
-            // Limpieza del formulario después de enviar datos
             formulario.submit();
         }
     }
 };
 
+// Función para modificar contacto
+const modificar = async (id) => {
+    const divModificar = document.querySelector('.overlay');
+    const btnCancelar = document.getElementById("btn-cancelar-modificacion");
+    const btnEnviarModificacion = document.getElementById("btn-enviar-modificacion");
+    const inputModificarNombre = document.getElementById("modificar-nombre");
+    const inputModificarEmail = document.getElementById("modificar-email");
+    const inputModificarFecha = document.getElementById("modificar-fecha");
+    const contactoAModificar = await contactoPorId(id);
+
+    divModificar.style.display = 'block';
+
+    inputModificarNombre.value = contactoAModificar.nombre;
+    inputModificarEmail.value = contactoAModificar.email;
+
+    const fecha = `${contactoAModificar.nacimiento.slice(0, 4)}${contactoAModificar.nacimiento.slice(4, 8)}${contactoAModificar.nacimiento.slice(8, 10)}`
+    inputModificarFecha.value = fecha;
+
+    btnCancelar.addEventListener('click', (e) => {
+        e.preventDefault();
+        divModificar.style.display = 'none';
+    });
+
+    btnEnviarModificacion.addEventListener('click', (e) => {
+        e.preventDefault();
+    });
+}
+
 // Función para eliminar contacto
 const eliminar = async (id) => {
-    const confirmacion = confirm("¿Desea eliminar el contacto?");
+
+    const data = await contactoPorId(id);
+    const confirmacion = confirm(`¿Desea eliminar el contacto "${data.nombre}"?`);
+    
     if (confirmacion) {
         const baja = await peticion('DELETE', `http://localhost:${PORT}/api/contactos/${id}`);
         if (baja) {
@@ -178,10 +218,19 @@ tabla.addEventListener('click', (event) => {
 
     if (event.target.tagName == "BUTTON" || event.target.tagName == "I") {
         if (event.target.id == "btn-agregar") {
+
             agregar();
+
         } else if (event.target.classList.contains("btn-eliminar") || event.target.classList.contains("fa-trash")) {
+
             const idcontacto = event.target.parentNode.dataset.id;
             eliminar(idcontacto);
+
+        } else if (event.target.classList.contains("btn-modificar") || event.target.classList.contains("fa-file-pen")) {
+
+            const idcontacto = event.target.parentNode.dataset.id;
+            modificar(idcontacto);
+
         }
     }
 });
