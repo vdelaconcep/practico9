@@ -2,6 +2,7 @@
 const mongoose = require('mongoose');
 const express = require('express');
 
+
 // Modelo de contacto en base de datos
 const Contacto = require('./modeloContacto');
 
@@ -11,8 +12,10 @@ const app = express();
 // Puerto
 const PORT = 3000;
 
-// Conexión con la base de datos local
-mongoose.connect('mongodb://localhost:27017/practico9')
+// Conexión con la base de datos
+const uri = "mongodb+srv://vdelaconcep:practico9@cluster0.lw36mte.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+
+mongoose.connect(uri)
     .then(() => console.log('Conectado a la base de datos'))
     .catch(err => console.log('No se pudo conectar con la base de datos', err));
 
@@ -69,8 +72,6 @@ app.delete('/api/contactos/:id', async (req, res) => {
         res.status(500).send('Error al eliminar el registro')
     }
 })
-
-
 
 // Middlewares de error
 app.use((req, res) => {
