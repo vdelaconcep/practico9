@@ -1,9 +1,6 @@
 // Declaración de variables:
 const PORT = 3000;
 const tabla = document.querySelector('table');
-let validacionNombre = false;
-let validacionEmail = false;
-let validacionFecha = false;
 
 // Promise para crear y enviar una petición
 const peticion = (metodo, url, datos) => {
@@ -11,7 +8,6 @@ const peticion = (metodo, url, datos) => {
         const xhr = new XMLHttpRequest();
         xhr.open(metodo, url, true);
 
-        // Se configura el tipo de dato (JSON) para POST y PUT
         if (metodo == 'POST' || metodo == 'PUT') {
             xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         }
@@ -21,18 +17,16 @@ const peticion = (metodo, url, datos) => {
             if (xhr.status == 200) {
 
                 // Si el método es "GET", devuelve los datos en la DB
-                if (metodo == 'GET') {
+                if (metodo === 'GET') {
                     resolve(JSON.parse(xhr.responseText));
                 } else {
                     resolve(true);
                 }
-
-            } else if (xhr.status == 204 && metodo == 'DELETE') {
+            } else if (xhr.status === 204 && metodo === 'DELETE') {
                 resolve(true);
             } else {
                 reject(new Error('Error en la petición de datos'));
             }
-
         };
 
         xhr.onerror = () => {
@@ -54,7 +48,6 @@ const contactoPorId = async (id) => {
     const dataCompleta = await obtenerDatos();
     const contacto = dataCompleta.find(element => element._id == id);
     if (!contacto) return null;
-
     return contacto;
 };
 
@@ -65,76 +58,68 @@ const cargarDatos = async () => {
 
     const fragmento = document.createDocumentFragment();
 
-    for (i = (data.length - 1); i >= 0; i--) {
+    data.reverse().forEach(({ _id, nombre, email, nacimiento }) => {
+        const fila = document.createElement('tr');
+        fila.style = 'background-color: #C7DBD2; border-bottom: 1px solid #A7B9B1';
 
-        let fila = document.createElement('tr');
-        fila.style = 'background-color: #C7DBD2 !important; border-bottom: 1px solid #A7B9B1';
-
-        fila.innerHTML += `
-            <td style="border-left: 1px solid #A7B9B1; border-right: 1px solid #A7B9B1">${data[i].nombre}</td>
-            <td style="border-right: 1px solid #A7B9B1">${data[i].email}</td>
-            <td style="border-right: 1px solid #A7B9B1">${data[i].nacimiento.slice(8, 10)}${data[i].nacimiento.slice(4, 8)}${data[i].nacimiento.slice(0, 4)}</td>
-            <td data-id="${data[i]._id}" style="border-right: 1px solid #A7B9B1">
-                <button data-id="${data[i]._id}" class = "btn btn-modificar btn-outline-dark m-1 border-1"><i class="fa-solid fa-file-pen"></i></button>
-                <button data-id="${data[i]._id}" class = "btn-eliminar btn btn-outline-dark m-1 border-1"><i class="fa-solid fa-trash"></i></button>
-            </td>
-            `;
+        fila.innerHTML = `
+            <td style="border-left: 1px solid #A7B9B1; border-right: 1px solid #A7B9B1">${nombre}</td>
+            <td style="border-right: 1px solid #A7B9B1">${email}</td>
+            <td style="border-right: 1px solid #A7B9B1">${nacimiento.slice(8, 10)}${nacimiento.slice(4, 8)}${nacimiento.slice(0, 4)}</td>
+            <td data-id="${_id}" style="border-right: 1px solid #A7B9B1">
+                <button class="btn btn-modificar btn-outline-dark m-1 border-1" data-id="${_id}">
+                    <i class="fa-solid fa-file-pen"></i>
+                </button>
+                <button class="btn-eliminar btn btn-outline-dark m-1 border-1" data-id="${_id}">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>`;
         fragmento.appendChild(fila);
-    };
+    });
 
     tabla.appendChild(fragmento);
 };
 
 // Función para validar input nombre
 function validarNombre(inputNombre, minlength, maxlength) {
-    let inputValue = inputNombre.value;
-    let longitud = inputValue.trim().length;
-    if (longitud < minlength) {
+    let valor = inputNombre.value.trim();
+    inputNombre.setCustomValidity("");
+
+    if (valor.length < minlength) {
         inputNombre.setCustomValidity('Este campo debe tener ' + minlength + ' caracteres como mínimo');
-        validacionNombre = false;
-    } else if (longitud > maxlength) {
+        return false;
+    } else if (valor.lenght > maxlength) {
         inputNombre.setCustomValidity('Este campo no debe tener más de ' + minlength + ' caracteres');
-        validacionNombre = false;
+        return false;
     } else {
-        validacionNombre = true;
+        return true;
     }
-    inputNombre.addEventListener('input', function () {
-        inputNombre.setCustomValidity("");
-    });
-    encodeURIComponent(inputValue);
-    inputNombre.value = inputValue;
-}
+};
 
 // Función para validar input tipo e-mail
 function validarEmail(inputEmail) {
     let regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    let inputValue = inputEmail.value;
-    if (!regex.test(inputValue)) {
+    inputEmail.setCustomValidity("");
+
+    if (!regex.test(inputEmail.value)) {
         inputEmail.setCustomValidity('Debe ingresar un e-mail válido');
-        validacionEmail = false;
+        return false;
     } else {
-        validacionEmail = true;
+        return true;
     }
-    inputEmail.addEventListener('input', function () {
-        inputEmail.setCustomValidity("");
-    });
-    encodeURIComponent(inputValue);
-    inputEmail.value = inputValue;
-}
+};
 
 // Función para validar fecha (que no quede vacía)
 function validarFecha(inputFecha) {
-    let inputValue = inputFecha.value;
-    if (inputValue == "") {
+    inputFecha.setCustomValidity("");
+
+    if (inputFecha.value == "") {
         inputFecha.setCustomValidity('Seleccione una fecha');
-        validacionFecha = false;
+        return false;
     } else {
-        validacionFecha = true;
+        return true;
     }
-    inputFecha.addEventListener('input', function () {
-        inputFecha.setCustomValidity("");
-    });
-}
+};
 
 // Función para agregar contacto
 const agregar = async () => {
@@ -144,12 +129,12 @@ const agregar = async () => {
     const inputNacimiento = document.getElementById('nacimientoContacto');
     const formulario = document.querySelector('form');
 
-    validarNombre(inputNombre, 3, 50);
-    validarEmail(inputEmail);
-    validarFecha(inputNacimiento);
+    let nombreOk = validarNombre(inputNombre, 3, 50);
+    let emailOk = validarEmail(inputEmail);
+    let fechaOk = validarFecha(inputNacimiento);
 
     // Si está validado el formulario, enviar los datos al servidor
-    if (validacionNombre && validacionEmail && validacionFecha) {
+    if (nombreOk && emailOk && fechaOk) {
 
         const nombre = inputNombre.value;
         const email = inputEmail.value;
@@ -173,7 +158,6 @@ const agregar = async () => {
 const modificar = async (id) => {
 
     const formulario = document.getElementById('form-modificar');
-    const divModificar = document.getElementById('div-modificar');
     const divOverlay = document.querySelector('.overlay');
     const btnCancelar = document.getElementById("btn-cancelar-modificacion");
     const btnEnviarModificacion = document.getElementById("btn-enviar-modificacion");
@@ -196,22 +180,29 @@ const modificar = async (id) => {
     });
 
     btnEnviarModificacion.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const nombre = inputModificarNombre.value;
-        const email = inputModificarEmail.value;
-        const nacimiento = inputModificarFecha.value;
 
-        const datos = {
-            nombre: nombre,
-            email: email,
-            nacimiento: nacimiento
-        };
+        let nombreOk = validarNombre(inputModificarNombre, 3, 50);
+        let emailOk = validarEmail(inputModificarEmail);
+        let fechaOk = validarFecha(inputModificarFecha);
 
-        const envio = await peticion('PUT', `http://localhost:${PORT}/api/contactos/${id}`, JSON.stringify(datos));
+        if (nombreOk && emailOk && fechaOk) {
 
-        if (envio) {
-            formulario.submit();
-            alert('El registro ha sido modificado');
+            const nombre = inputModificarNombre.value;
+            const email = inputModificarEmail.value;
+            const nacimiento = inputModificarFecha.value;
+
+            const datos = {
+                nombre: nombre,
+                email: email,
+                nacimiento: nacimiento
+            };
+
+            const envio = await peticion('PUT', `http://localhost:${PORT}/api/contactos/${id}`, JSON.stringify(datos));
+
+            if (envio) {
+                alert('El registro ha sido modificado');
+                formulario.submit();
+            }
         }
     });
 };
@@ -228,29 +219,22 @@ const eliminar = async (id) => {
             location.reload();
         }
     }
-
 };
-
 
 // Evento al hacer click en un botón de la tabla
 tabla.addEventListener('click', (event) => {
 
-    if (event.target.tagName == "BUTTON" || event.target.tagName == "I") {
-        if (event.target.id == "btn-agregar") {
+    const target = event.target.closest('button');
+    if (!target) return;
 
-            agregar();
+    const id = target.dataset.id;
 
-        } else if (event.target.classList.contains("btn-eliminar") || event.target.classList.contains("fa-trash")) {
-
-            const idcontacto = event.target.parentNode.dataset.id;
-            eliminar(idcontacto);
-
-        } else if (event.target.classList.contains("btn-modificar") || event.target.classList.contains("fa-file-pen")) {
-
-            const idcontacto = event.target.parentNode.dataset.id;
-            modificar(idcontacto);
-
-        }
+    if (target.id === "btn-agregar") {
+        agregar();
+    } else if (target.classList.contains("btn-eliminar")) {
+        eliminar(id);
+    } else if (target.classList.contains("btn-modificar")) {
+        modificar(id);
     }
 });
 
