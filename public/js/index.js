@@ -78,8 +78,11 @@ const cargarDatos = async () => {
 
 // Función para validar input nombre
 function validarNombre(inputNombre, minlength, maxlength) {
+    inputNombre.addEventListener('input', () => {
+        inputNombre.setCustomValidity("");
+    });
+    
     let valor = inputNombre.value.trim();
-    inputNombre.setCustomValidity("");
 
     if (valor.length < minlength) {
         inputNombre.setCustomValidity('Este campo debe tener ' + minlength + ' caracteres como mínimo');
@@ -94,8 +97,11 @@ function validarNombre(inputNombre, minlength, maxlength) {
 
 // Función para validar input tipo e-mail
 function validarEmail(inputEmail) {
+    inputEmail.addEventListener('input', () => {
+        inputEmail.setCustomValidity("");
+    });
+
     let regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    inputEmail.setCustomValidity("");
 
     if (!regex.test(inputEmail.value)) {
         inputEmail.setCustomValidity('Debe ingresar un e-mail válido');
@@ -107,8 +113,10 @@ function validarEmail(inputEmail) {
 
 // Función para validar fecha (que no quede vacía)
 function validarFecha(inputFecha) {
-    inputFecha.setCustomValidity("");
-
+    inputFecha.addEventListener('input', () => {
+        inputFecha.setCustomValidity("");
+    });
+    
     if (inputFecha.value == "") {
         inputFecha.setCustomValidity('Seleccione una fecha');
         return false;
@@ -129,7 +137,7 @@ const duplicado = async (nombre, email, excluirId = null) => {
 };
 
 // Función para agregar contacto
-const agregar = async () => {
+const agregar = async (event) => {
 
     const inputNombre = document.getElementById('nombreContacto');
     const inputEmail = document.getElementById('emailContacto');
@@ -141,6 +149,7 @@ const agregar = async () => {
 
     // Si está validado el formulario, enviar los datos al servidor
     if (nombreOk && emailOk && fechaOk) {
+        event.preventDefault();
 
         const nombre = inputNombre.value;
         const email = inputEmail.value;
@@ -170,7 +179,6 @@ const agregar = async () => {
 // Función para modificar registro
 const modificar = async (id) => {
 
-    const formulario = document.getElementById('form-modificar');
     const divOverlay = document.querySelector('.overlay');
     const btnCancelar = document.getElementById("btn-cancelar-modificacion");
     const btnEnviarModificacion = document.getElementById("btn-enviar-modificacion");
@@ -200,10 +208,17 @@ const modificar = async (id) => {
         let fechaOk = validarFecha(inputModificarFecha);
 
         if (nombreOk && emailOk && fechaOk) {
+            e.preventDefault();
 
             const nombre = inputModificarNombre.value;
             const email = inputModificarEmail.value;
             const nacimiento = inputModificarFecha.value;
+
+            const existe = await duplicado(nombre, email);
+            if (existe) {
+                alert('Ya existe un contacto con ese nombre o email');
+                return;
+            }
 
             const datos = {
                 nombre: nombre,
@@ -215,7 +230,7 @@ const modificar = async (id) => {
 
             if (envio) {
                 alert('El registro ha sido modificado');
-                formulario.submit();
+                location.reload();
             }
         }
     });
@@ -242,7 +257,7 @@ tabla.addEventListener('click', (event) => {
     const id = target.dataset.id;
 
     if (target.id === "btn-agregar") {
-        agregar();
+        agregar(event);
     } else if (target.classList.contains("btn-eliminar")) {
         eliminar(id);
     } else if (target.classList.contains("btn-modificar")) {
