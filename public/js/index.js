@@ -17,16 +17,16 @@ const peticion = (metodo, url, datos) => {
         }
 
         xhr.onload = () => {
-            
+
             if (xhr.status == 200) {
-                
+
                 // Si el método es "GET", devuelve los datos en la DB
                 if (metodo == 'GET') {
                     resolve(JSON.parse(xhr.responseText));
                 } else {
                     resolve(true);
                 }
-                
+
             } else if (xhr.status == 204 && metodo == 'DELETE') {
                 resolve(true);
             } else {
@@ -47,7 +47,7 @@ const peticion = (metodo, url, datos) => {
 const obtenerDatos = async () => {
     const data = await peticion('GET', `http://localhost:${PORT}/api/contactos`);
     return data;
-}
+};
 
 // Función para obtener datos de un contacto a partir del id
 const contactoPorId = async (id) => {
@@ -132,7 +132,7 @@ function validarFecha(inputFecha) {
         validacionFecha = true;
     }
     inputFecha.addEventListener('input', function () {
-    inputFecha.setCustomValidity("");
+        inputFecha.setCustomValidity("");
     });
 }
 
@@ -187,7 +187,7 @@ const modificar = async (id) => {
     inputModificarNombre.value = contactoAModificar.nombre;
     inputModificarEmail.value = contactoAModificar.email;
 
-    const fecha = `${contactoAModificar.nacimiento.slice(0, 4)}${contactoAModificar.nacimiento.slice(4, 8)}${contactoAModificar.nacimiento.slice(8, 10)}`
+    const fecha = `${contactoAModificar.nacimiento.slice(0, 4)}${contactoAModificar.nacimiento.slice(4, 8)}${contactoAModificar.nacimiento.slice(8, 10)}`;
     inputModificarFecha.value = fecha;
 
     btnCancelar.addEventListener('click', (e) => {
@@ -214,28 +214,22 @@ const modificar = async (id) => {
             alert('El registro ha sido modificado');
         }
     });
-
-    /* divOverlay.addEventListener('click', (event) => {
-        if (event.target != divModificar) {
-            divOverlay.style.display = 'none';
-        }
-    }) */
-}
+};
 
 // Función para eliminar contacto
 const eliminar = async (id) => {
 
     const data = await contactoPorId(id);
     const confirmacion = confirm(`¿Desea eliminar el contacto "${data.nombre}"?`);
-    
+
     if (confirmacion) {
         const baja = await peticion('DELETE', `http://localhost:${PORT}/api/contactos/${id}`);
         if (baja) {
             location.reload();
         }
     }
-    
-}
+
+};
 
 
 // Evento al hacer click en un botón de la tabla

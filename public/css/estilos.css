@@ -3,7 +3,28 @@
     src: url(../fonts/Bungasai.ttf);
 }
 
+#div-error {
+    display: flex;
+    justify-content: center;
+}
+
+#error {
+    width: 80%;
+    background-color: indianred;
+    color: white;
+    position: absolute;
+    top: -100px;
+    opacity: 0;
+    transition: top 0.5s ease-in-out, opacity 0.5s ease-in-out;
+}
+
+#error.visible {
+    top: 0;
+    opacity: 1;
+}
+
 h1 {
+    margin-top: 30px;
     font-family: 'Bungasai';
     font-size: 6em;
 }
@@ -46,6 +67,12 @@ input {
 @media (max-width: 1000px) {
     .btn-modificar, .btn-eliminar {
         width: 42px;
+    }
+}
+
+@media (max-width: 440px) {
+    h1 {
+        font-size: 5em;
     }
 }
 
