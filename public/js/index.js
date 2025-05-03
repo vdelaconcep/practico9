@@ -14,19 +14,14 @@ const peticion = (metodo, url, datos) => {
         }
 
         xhr.onload = () => {
-
-            if (xhr.status == 200) {
-
-                // Si el método es "GET", devuelve los datos en la DB
+            if ((xhr.status >= 200 && xhr.status < 300)) {
                 if (metodo === 'GET') {
                     resolve(JSON.parse(xhr.responseText));
                 } else {
                     resolve(true);
                 }
-            } else if (xhr.status === 204 && metodo === 'DELETE') {
-                resolve(true);
             } else {
-                reject(new Error('Error en la petición de datos'));
+                reject(new Error(`Error en la petición: ${xhr.status} ${xhr.statusText}`));
             }
         };
 
@@ -89,7 +84,7 @@ function validarNombre(inputNombre, minlength, maxlength) {
     if (valor.length < minlength) {
         inputNombre.setCustomValidity('Este campo debe tener ' + minlength + ' caracteres como mínimo');
         return false;
-    } else if (valor.lenght > maxlength) {
+    } else if (valor.length > maxlength) {
         inputNombre.setCustomValidity('Este campo no debe tener más de ' + maxlength + ' caracteres');
         return false;
     } else {
@@ -122,13 +117,23 @@ function validarFecha(inputFecha) {
     }
 };
 
+// Función para verificar si el nombre o mail que se ingresan están duplicados
+const duplicado = async (nombre, email, excluirId = null) => {
+    const contactos = await obtenerDatos();
+    return contactos.some(contacto => {
+        const mismoNombre = contacto.nombre.toLowerCase() === nombre.toLowerCase();
+        const mismoEmail = contacto.email.toLowerCase() === email.toLowerCase();
+        const distintoId = contacto._id !== excluirId;
+        return distintoId && (mismoNombre || mismoEmail);
+    });
+};
+
 // Función para agregar contacto
 const agregar = async () => {
 
     const inputNombre = document.getElementById('nombreContacto');
     const inputEmail = document.getElementById('emailContacto');
     const inputNacimiento = document.getElementById('nacimientoContacto');
-    const formulario = document.querySelector('form');
 
     let nombreOk = validarNombre(inputNombre, 3, 50);
     let emailOk = validarEmail(inputEmail);
@@ -141,6 +146,12 @@ const agregar = async () => {
         const email = inputEmail.value;
         const nacimiento = inputNacimiento.value;
 
+        const existe = await duplicado(nombre, email);
+        if (existe) {
+            alert('Ya existe un contacto con ese nombre o email');
+            return;
+        }
+
         const datos = {
             nombre: nombre,
             email: email,
@@ -150,7 +161,8 @@ const agregar = async () => {
         const envio = await peticion('POST', `http://localhost:${PORT}/api/contactos`, JSON.stringify(datos));
 
         if (envio) {
-            formulario.submit();
+            alert('El registro ha sido ingresado');
+            location.reload();
         }
     }
 };

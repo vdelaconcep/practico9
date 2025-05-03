@@ -34,6 +34,7 @@ app.post('/api/contactos', (req, res) => {
     // Registro en base de datos
     const contacto = new Contacto(contactoNuevo);
     contacto.save();
+    res.status(200).json(req.body)
 });
 
 // Obtención de datos desde la base de datos y envío al front
