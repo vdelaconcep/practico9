@@ -81,17 +81,17 @@ app.delete('/api/contactos/:id', async (req, res) => {
         }
         res.status(204).send();
     } catch (error) {
-        res.status(500).json({mensaje: 'Error al eliminar el registro'})
+        res.status(500).json({ mensaje: 'Error al eliminar el registro' });
     }
 })
 
 // Middlewares de error
 app.use((req, res) => {
-    res.status(404).send('Página no encontrada');
+    res.status(404).json({ mensaje: 'Página no encontrada' });
 });
 
 app.use((err, req, res, next) => {
-    res.status(500).send('Error interno del servidor');
+    res.status(500).json({ mensaje: 'Error interno del servidor' });
 });
 
 // Ponemos a escuchar el servidor

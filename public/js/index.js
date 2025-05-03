@@ -34,7 +34,7 @@ const peticion = (metodo, url, datos) => {
                         mensaje = dataError.mensaje;
                     }
                 } catch (e) {
-                    // (Sin responseText)
+                    mensaje = 'Error desconocido'// (Sin responseText)
                 }
 
                 reject(new Error(mensaje));
@@ -194,7 +194,7 @@ const agregar = async (event) => {
             }
         }
     } catch (err) {
-        mostrarError(err.mensaje)
+        mostrarError(err.message)
     }
 };
 
@@ -257,7 +257,7 @@ const modificar = async (id) => {
             }
         });
     } catch (err) {
-        mostrarError(err.mensaje);
+        mostrarError(err.message);
     }
 };
 
@@ -272,7 +272,7 @@ const eliminar = async (id) => {
             if (baja) location.reload();
         }
     } catch (err) {
-        mostrarError(err.mensaje);
+        mostrarError(err.message);
     }
 };
 
