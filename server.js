@@ -81,7 +81,7 @@ app.delete('/api/contactos/:id', async (req, res) => {
         }
         res.status(204).send();
     } catch (error) {
-        res.status(500).json({Mensaje: 'Error al eliminar el registro'})
+        res.status(500).json({mensaje: 'Error al eliminar el registro'})
     }
 })
 
