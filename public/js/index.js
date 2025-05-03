@@ -2,6 +2,7 @@
 const PORT = 3000;
 const tabla = document.querySelector('table');
 
+
 // Promise para crear y enviar una petición
 const peticion = (metodo, url, datos) => {
     return new Promise((resolve, reject) => {
@@ -89,7 +90,7 @@ function validarNombre(inputNombre, minlength, maxlength) {
         inputNombre.setCustomValidity('Este campo debe tener ' + minlength + ' caracteres como mínimo');
         return false;
     } else if (valor.lenght > maxlength) {
-        inputNombre.setCustomValidity('Este campo no debe tener más de ' + minlength + ' caracteres');
+        inputNombre.setCustomValidity('Este campo no debe tener más de ' + maxlength + ' caracteres');
         return false;
     } else {
         return true;
@@ -154,7 +155,7 @@ const agregar = async () => {
     }
 };
 
-// Función para modificar contacto
+// Función para modificar registro
 const modificar = async (id) => {
 
     const formulario = document.getElementById('form-modificar');
@@ -164,6 +165,7 @@ const modificar = async (id) => {
     const inputModificarNombre = document.getElementById("modificar-nombre");
     const inputModificarEmail = document.getElementById("modificar-email");
     const inputModificarFecha = document.getElementById("modificar-fecha");
+    
     const contactoAModificar = await contactoPorId(id);
 
     divOverlay.style.display = 'block';
@@ -215,9 +217,7 @@ const eliminar = async (id) => {
 
     if (confirmacion) {
         const baja = await peticion('DELETE', `http://localhost:${PORT}/api/contactos/${id}`);
-        if (baja) {
-            location.reload();
-        }
+        if (baja) location.reload();
     }
 };
 
