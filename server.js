@@ -24,26 +24,30 @@ app.use(express.static('public'));
 app.use(express.json());
 
 // Recepción de datos desde el front
-app.post('/api/contactos', (req, res) => {
-    const contactoNuevo = {
-        nombre: req.body.nombre,
-        email: req.body.email,
-        nacimiento: req.body.nacimiento
-    };
+app.post('/api/contactos', async (req, res) => {
+    try {
+        const contactoNuevo = {
+            nombre: req.body.nombre,
+            email: req.body.email,
+            nacimiento: req.body.nacimiento
+        };
 
-    // Registro en base de datos
-    const contacto = new Contacto(contactoNuevo);
-    contacto.save();
-    res.status(200).json(req.body)
+        // Registro en base de datos
+        const contacto = new Contacto(contactoNuevo);
+        const contactoGuardado = await contacto.save();
+        res.status(200).json(contactoGuardado)
+    } catch (err) {
+        res.status(500).json({mensaje: 'Error al guardar el contacto'})
+    }
 });
 
 // Obtención de datos desde la base de datos y envío al front
 app.get('/api/contactos', async (req, res) => {
     try {
         const contactos = await (Contacto.find());
-        res.json(contactos);
+        res.status(200).json(contactos);
     } catch (error) {
-        res.status(500).send('Error al obtener los contactos');
+        res.status(500).json({mensaje: 'Error al obtener los contactos'});
     }
 });
 
@@ -58,9 +62,13 @@ app.put('/api/contactos/:id', async (req, res) => {
             nacimiento: req.body.nacimiento
         };
         const actualizacion = await Contacto.updateOne(buscaPorID, contactoModificado);
-        res.status(200).send(actualizacion);
+
+        if (!actualizacion) {
+            return res.status(404).json({mensaje: 'Contacto no encontrado'})
+        }
+        res.status(200).json(actualizacion);
     } catch (error) {
-        res.status(500).send('Error al enviar los datos');
+        res.status(500).json({mensaje: 'Error en la modificación'});
     }
 })
 
@@ -68,9 +76,12 @@ app.put('/api/contactos/:id', async (req, res) => {
 app.delete('/api/contactos/:id', async (req, res) => {
     try {
         const baja = await Contacto.findByIdAndDelete(req.params.id);
-        res.status(204).send(baja)
+        if (!baja) {
+            res.status(404).json({mensaje: 'Contacto no encontrado'})
+        }
+        res.status(204).send();
     } catch (error) {
-        res.status(500).send('Error al eliminar el registro')
+        res.status(500).json({Mensaje: 'Error al eliminar el registro'})
     }
 })
 
@@ -79,7 +90,7 @@ app.use((req, res) => {
     res.status(404).send('Página no encontrada');
 });
 
-app.use((req, res) => {
+app.use((err, req, res, next) => {
     res.status(500).send('Error interno del servidor');
 });
 

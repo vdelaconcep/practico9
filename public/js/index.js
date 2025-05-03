@@ -2,6 +2,12 @@
 const PORT = 3000;
 const tabla = document.querySelector('table');
 
+// Función para mostrar errores
+const mostrarError = (mensaje) => {
+    const divError = document.getElementById('error');
+    divError.innerText = mensaje;
+    divError.classList.add('visible');
+}
 
 // Promise para crear y enviar una petición
 const peticion = (metodo, url, datos) => {
@@ -21,12 +27,22 @@ const peticion = (metodo, url, datos) => {
                     resolve(true);
                 }
             } else {
-                reject(new Error(`Error en la petición: ${xhr.status} ${xhr.statusText}`));
+                let mensaje = `Error en la petición: ${xhr.status} ${xhr.statusText}`
+                try {
+                    const dataError = JSON.parse(xhr.responseText);
+                    if (dataError.mensaje) {
+                        mensaje = dataError.mensaje;
+                    }
+                } catch (e) {
+                    // (Sin responseText)
+                }
+
+                reject(new Error(mensaje));
             }
         };
 
         xhr.onerror = () => {
-            reject(new Error('Error en la petición de datos'));
+            reject(new Error('Error en la petición'));
         };
 
         xhr.send(datos);
@@ -49,16 +65,16 @@ const contactoPorId = async (id) => {
 
 // Cargar datos en la tabla
 const cargarDatos = async () => {
+    try {
+        const data = await obtenerDatos();
 
-    const data = await obtenerDatos();
+        const fragmento = document.createDocumentFragment();
 
-    const fragmento = document.createDocumentFragment();
+        data.reverse().forEach(({ _id, nombre, email, nacimiento }) => {
+            const fila = document.createElement('tr');
+            fila.style = 'background-color: #C7DBD2; border-bottom: 1px solid #A7B9B1';
 
-    data.reverse().forEach(({ _id, nombre, email, nacimiento }) => {
-        const fila = document.createElement('tr');
-        fila.style = 'background-color: #C7DBD2; border-bottom: 1px solid #A7B9B1';
-
-        fila.innerHTML = `
+            fila.innerHTML = `
             <td style="border-left: 1px solid #A7B9B1; border-right: 1px solid #A7B9B1">${nombre}</td>
             <td style="border-right: 1px solid #A7B9B1">${email}</td>
             <td style="border-right: 1px solid #A7B9B1">${nacimiento.slice(8, 10)}${nacimiento.slice(4, 8)}${nacimiento.slice(0, 4)}</td>
@@ -70,10 +86,13 @@ const cargarDatos = async () => {
                     <i class="fa-solid fa-trash"></i>
                 </button>
             </td>`;
-        fragmento.appendChild(fila);
-    });
+            fragmento.appendChild(fila);
+        });
 
-    tabla.appendChild(fragmento);
+        tabla.appendChild(fragmento);
+    } catch (err) {
+        mostrarError(err.message)
+    }
 };
 
 // Función para validar input nombre
@@ -138,83 +157,24 @@ const duplicado = async (nombre, email, excluirId = null) => {
 
 // Función para agregar contacto
 const agregar = async (event) => {
+    try {
+        const inputNombre = document.getElementById('nombreContacto');
+        const inputEmail = document.getElementById('emailContacto');
+        const inputNacimiento = document.getElementById('nacimientoContacto');
 
-    const inputNombre = document.getElementById('nombreContacto');
-    const inputEmail = document.getElementById('emailContacto');
-    const inputNacimiento = document.getElementById('nacimientoContacto');
+        let nombreOk = validarNombre(inputNombre, 3, 50);
+        let emailOk = validarEmail(inputEmail);
+        let fechaOk = validarFecha(inputNacimiento);
 
-    let nombreOk = validarNombre(inputNombre, 3, 50);
-    let emailOk = validarEmail(inputEmail);
-    let fechaOk = validarFecha(inputNacimiento);
-
-    // Si está validado el formulario, enviar los datos al servidor
-    if (nombreOk && emailOk && fechaOk) {
-        event.preventDefault();
-
-        const nombre = inputNombre.value;
-        const email = inputEmail.value;
-        const nacimiento = inputNacimiento.value;
-
-        const existe = await duplicado(nombre, email);
-        if (existe) {
-            alert('Ya existe un contacto con ese nombre o email');
-            return;
-        }
-
-        const datos = {
-            nombre: nombre,
-            email: email,
-            nacimiento: nacimiento
-        };
-
-        const envio = await peticion('POST', `http://localhost:${PORT}/api/contactos`, JSON.stringify(datos));
-
-        if (envio) {
-            alert('El registro ha sido ingresado');
-            location.reload();
-        }
-    }
-};
-
-// Función para modificar registro
-const modificar = async (id) => {
-
-    const divOverlay = document.querySelector('.overlay');
-    const btnCancelar = document.getElementById("btn-cancelar-modificacion");
-    const btnEnviarModificacion = document.getElementById("btn-enviar-modificacion");
-    const inputModificarNombre = document.getElementById("modificar-nombre");
-    const inputModificarEmail = document.getElementById("modificar-email");
-    const inputModificarFecha = document.getElementById("modificar-fecha");
-
-    const contactoAModificar = await contactoPorId(id);
-
-    divOverlay.style.display = 'block';
-
-    inputModificarNombre.value = contactoAModificar.nombre;
-    inputModificarEmail.value = contactoAModificar.email;
-
-    const fecha = `${contactoAModificar.nacimiento.slice(0, 4)}${contactoAModificar.nacimiento.slice(4, 8)}${contactoAModificar.nacimiento.slice(8, 10)}`;
-    inputModificarFecha.value = fecha;
-
-    btnCancelar.addEventListener('click', (e) => {
-        e.preventDefault();
-        divOverlay.style.display = 'none';
-    });
-
-    btnEnviarModificacion.addEventListener('click', async (e) => {
-
-        let nombreOk = validarNombre(inputModificarNombre, 3, 50);
-        let emailOk = validarEmail(inputModificarEmail);
-        let fechaOk = validarFecha(inputModificarFecha);
-
+        // Si está validado el formulario, enviar los datos al servidor
         if (nombreOk && emailOk && fechaOk) {
-            e.preventDefault();
+            event.preventDefault();
 
-            const nombre = inputModificarNombre.value;
-            const email = inputModificarEmail.value;
-            const nacimiento = inputModificarFecha.value;
+            const nombre = inputNombre.value;
+            const email = inputEmail.value;
+            const nacimiento = inputNacimiento.value;
 
-            const existe = await duplicado(nombre, email, contactoAModificar._id);
+            const existe = await duplicado(nombre, email);
             if (existe) {
                 alert('Ya existe un contacto con ese nombre o email');
                 return;
@@ -226,25 +186,93 @@ const modificar = async (id) => {
                 nacimiento: nacimiento
             };
 
-            const envio = await peticion('PUT', `http://localhost:${PORT}/api/contactos/${id}`, JSON.stringify(datos));
+            const envio = await peticion('POST', `http://localhost:${PORT}/api/contactos`, JSON.stringify(datos));
 
             if (envio) {
-                alert('El registro ha sido modificado');
+                alert('El registro ha sido ingresado');
                 location.reload();
             }
         }
-    });
+    } catch (err) {
+        mostrarError(err.mensaje)
+    }
+};
+
+// Función para modificar registro
+const modificar = async (id) => {
+    try {
+        const divOverlay = document.querySelector('.overlay');
+        const btnCancelar = document.getElementById("btn-cancelar-modificacion");
+        const btnEnviarModificacion = document.getElementById("btn-enviar-modificacion");
+        const inputModificarNombre = document.getElementById("modificar-nombre");
+        const inputModificarEmail = document.getElementById("modificar-email");
+        const inputModificarFecha = document.getElementById("modificar-fecha");
+
+        const contactoAModificar = await contactoPorId(id);
+
+        divOverlay.style.display = 'block';
+
+        inputModificarNombre.value = contactoAModificar.nombre;
+        inputModificarEmail.value = contactoAModificar.email;
+
+        const fecha = `${contactoAModificar.nacimiento.slice(0, 4)}${contactoAModificar.nacimiento.slice(4, 8)}${contactoAModificar.nacimiento.slice(8, 10)}`;
+        inputModificarFecha.value = fecha;
+
+        btnCancelar.addEventListener('click', (e) => {
+            e.preventDefault();
+            divOverlay.style.display = 'none';
+        });
+
+        btnEnviarModificacion.addEventListener('click', async (e) => {
+
+            let nombreOk = validarNombre(inputModificarNombre, 3, 50);
+            let emailOk = validarEmail(inputModificarEmail);
+            let fechaOk = validarFecha(inputModificarFecha);
+
+            if (nombreOk && emailOk && fechaOk) {
+                e.preventDefault();
+
+                const nombre = inputModificarNombre.value;
+                const email = inputModificarEmail.value;
+                const nacimiento = inputModificarFecha.value;
+
+                const existe = await duplicado(nombre, email, contactoAModificar._id);
+                if (existe) {
+                    alert('Ya existe un contacto con ese nombre o email');
+                    return;
+                }
+
+                const datos = {
+                    nombre: nombre,
+                    email: email,
+                    nacimiento: nacimiento
+                };
+
+                const envio = await peticion('PUT', `http://localhost:${PORT}/api/contactos/${id}`, JSON.stringify(datos));
+
+                if (envio) {
+                    alert('El registro ha sido modificado');
+                    location.reload();
+                }
+            }
+        });
+    } catch (err) {
+        mostrarError(err.mensaje);
+    }
 };
 
 // Función para eliminar contacto
 const eliminar = async (id) => {
+    try {
+        const data = await contactoPorId(id);
+        const confirmacion = confirm(`¿Desea eliminar el contacto "${data.nombre}"?`);
 
-    const data = await contactoPorId(id);
-    const confirmacion = confirm(`¿Desea eliminar el contacto "${data.nombre}"?`);
-
-    if (confirmacion) {
-        const baja = await peticion('DELETE', `http://localhost:${PORT}/api/contactos/${id}`);
-        if (baja) location.reload();
+        if (confirmacion) {
+            const baja = await peticion('DELETE', `http://localhost:${PORT}/api/contactos/${id}`);
+            if (baja) location.reload();
+        }
+    } catch (err) {
+        mostrarError(err.mensaje);
     }
 };
 
