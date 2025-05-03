@@ -81,7 +81,7 @@ function validarNombre(inputNombre, minlength, maxlength) {
     inputNombre.addEventListener('input', () => {
         inputNombre.setCustomValidity("");
     });
-    
+
     let valor = inputNombre.value.trim();
 
     if (valor.length < minlength) {
@@ -116,7 +116,7 @@ function validarFecha(inputFecha) {
     inputFecha.addEventListener('input', () => {
         inputFecha.setCustomValidity("");
     });
-    
+
     if (inputFecha.value == "") {
         inputFecha.setCustomValidity('Seleccione una fecha');
         return false;
@@ -185,7 +185,7 @@ const modificar = async (id) => {
     const inputModificarNombre = document.getElementById("modificar-nombre");
     const inputModificarEmail = document.getElementById("modificar-email");
     const inputModificarFecha = document.getElementById("modificar-fecha");
-    
+
     const contactoAModificar = await contactoPorId(id);
 
     divOverlay.style.display = 'block';
@@ -214,7 +214,7 @@ const modificar = async (id) => {
             const email = inputModificarEmail.value;
             const nacimiento = inputModificarFecha.value;
 
-            const existe = await duplicado(nombre, email);
+            const existe = await duplicado(nombre, email, contactoAModificar._id);
             if (existe) {
                 alert('Ya existe un contacto con ese nombre o email');
                 return;
